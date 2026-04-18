@@ -26,26 +26,6 @@ The **verbatim GPL-2.0 license text** for this project is in the repository file
 
 ---
 
-## Publishing to GitHub
-
-1. Do **not** commit `.venv/` or other ignored paths (see **`.gitignore`**).
-2. Ensure no secrets, customer data, or personal paths are in the tree.
-3. Recommended first push:
-
-   ```bash
-   git init
-   git add .
-   git status   # review
-   git commit -m "Initial import: AnalytiX"
-   git branch -M main
-   git remote add origin https://github.com/<your-org>/<your-repo>.git
-   git push -u origin main
-   ```
-
-4. On GitHub, set the repository **license** to **GPL-2.0** if it is not detected automatically from `LICENSE`.
-
----
-
 ## Requirements
 
 - **Python 3.10+**
