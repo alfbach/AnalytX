@@ -6,6 +6,7 @@ Run: python analytx_server.py  → http://127.0.0.1:8765
 
 import base64
 import io
+import os
 import re
 import threading
 from pathlib import Path
@@ -122,10 +123,12 @@ async def convert_rvtools(
 
 
 def main():
+    host = os.environ.get("ANALYTX_HOST", "127.0.0.1")
+    port = int(os.environ.get("ANALYTX_PORT", "8765"))
     uvicorn.run(
         "analytx_server:app",
-        host="127.0.0.1",
-        port=8765,
+        host=host,
+        port=port,
         reload=False,
     )
 

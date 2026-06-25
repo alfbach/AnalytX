@@ -127,6 +127,65 @@ python analytx_report.py /path/to/folder [output.docx]
 | `windows/` | Windows setup/start scripts |
 | `unix/` | macOS/Linux setup/start scripts |
 | `requirements.txt` | Python dependencies |
+| `Dockerfile` | Container image for Docker / Kubernetes |
+| `k8s/` | Kubernetes Deployment and Service manifests |
+| `unix/build-k8s-image.sh` | Build (and optionally push) the container image |
+| `build-k8s-image.sh` | Root wrapper for the image build script |
+
+---
+
+## Docker & Kubernetes
+
+Build the image from the project root:
+
+```bash
+chmod +x unix/build-k8s-image.sh build-k8s-image.sh   # once
+./build-k8s-image.sh
+```
+
+With registry tag, push, and Kustomize update:
+
+```bash
+./unix/build-k8s-image.sh -t ghcr.io/myorg/analytix:1.0.0 --push --update-kustomize
+```
+
+Windows:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File windows\build-k8s-image.ps1 -Tag ghcr.io/myorg/analytix:1.0.0 -Push -UpdateKustomize
+```
+
+Manual build (without script):
+
+```bash
+docker build -t analytix:latest .
+```
+
+Run locally (listens on all interfaces inside the container):
+
+```bash
+docker run --rm -p 8765:8765 analytix:latest
+```
+
+Open **http://127.0.0.1:8765**.
+
+Deploy to Kubernetes (adjust the image name/tag for your registry):
+
+```bash
+docker build -t your-registry/analytix:latest .
+docker push your-registry/analytix:latest
+
+# edit k8s/kustomization.yaml → images.newName / newTag, then:
+kubectl apply -k k8s/
+kubectl port-forward svc/analytix 8765:80
+```
+
+Environment variables (optional):
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `ANALYTX_HOST` | `127.0.0.1` | Bind address (`0.0.0.0` in the container image) |
+| `ANALYTX_PORT` | `8765` | HTTP port |
 
 ---
 

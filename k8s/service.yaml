@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: analytix
+  labels:
+    app.kubernetes.io/name: analytix
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: analytix
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
