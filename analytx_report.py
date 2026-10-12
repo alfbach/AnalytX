@@ -5,7 +5,14 @@ version = "18042026"
 
 import locale
 
-locale.setlocale(locale.LC_ALL, '')
+# Containers (esp. slim images / OpenShift) often lack a system locale matching ''.
+try:
+    locale.setlocale(locale.LC_ALL, '')
+except locale.Error:
+    try:
+        locale.setlocale(locale.LC_ALL, 'C.UTF-8')
+    except locale.Error:
+        pass
 
 try:
     import urllib.request

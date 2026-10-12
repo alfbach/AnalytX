@@ -186,6 +186,15 @@ Environment variables (optional):
 |----------|---------|-------------|
 | `ANALYTX_HOST` | `127.0.0.1` | Bind address (`0.0.0.0` in the container image) |
 | `ANALYTX_PORT` | `8765` | HTTP port |
+| `TMPDIR` | `/tmp` (image) | Writable temp dir for large RVTools upload spooling |
+| `HOME` / `XDG_*` | `/tmp` (image) | Avoid writes under a missing home on read-only root FS |
+
+### OpenShift notes
+
+- The Deployment does **not** pin `runAsUser`/`runAsGroup` so the `restricted` / `restricted-v2` SCC can inject a namespace UID.
+- The image is prepared for an **arbitrary non-root UID** (root group `g=u` on `/app`).
+- With `readOnlyRootFilesystem: true`, mount a writable volume at `/tmp` and set `TMPDIR`/`HOME` there (already in `k8s/deployment.yaml`). Large `.xlsx` uploads may be spooled to disk by the multipart parser even though the report pipeline itself is in-memory.
+- Prefer `podman` or `docker` for builds; OpenShift builds can use the same `Dockerfile`.
 
 ---
 

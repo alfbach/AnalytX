@@ -8,6 +8,7 @@ import base64
 import io
 import os
 import re
+import tempfile
 import threading
 from pathlib import Path
 from typing import Optional
@@ -21,6 +22,31 @@ import analytx_report
 
 _lock = threading.Lock()
 STATIC_DIR = Path(__file__).resolve().parent / "static"
+
+
+def _ensure_writable_runtime_dirs() -> None:
+    """
+    Keep temp/cache under a writable path when the root FS is read-only
+    (typical Docker/Podman/OpenShift: readOnlyRootFilesystem + emptyDir /tmp).
+    Large RVTools uploads may be spooled to disk by python-multipart.
+    """
+    tmp = os.environ.get("TMPDIR") or os.environ.get("TMP") or "/tmp"
+    try:
+        os.makedirs(tmp, exist_ok=True)
+    except OSError:
+        tmp = "/tmp"
+        try:
+            os.makedirs(tmp, exist_ok=True)
+        except OSError:
+            return
+    os.environ.setdefault("TMPDIR", tmp)
+    os.environ.setdefault("HOME", tmp)
+    os.environ.setdefault("XDG_CACHE_HOME", tmp)
+    os.environ.setdefault("XDG_CONFIG_HOME", tmp)
+    tempfile.tempdir = tmp
+
+
+_ensure_writable_runtime_dirs()
 
 
 def _norm_lang(lang: Optional[str]) -> str:

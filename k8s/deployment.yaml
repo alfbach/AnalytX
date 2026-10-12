@@ -15,11 +15,12 @@ spec:
       labels:
         app.kubernetes.io/name: analytix
     spec:
+      # Do not set runAsUser/runAsGroup: OpenShift restricted SCC assigns a
+      # namespace UID range; a fixed 65534 often fails admission.
       securityContext:
         runAsNonRoot: true
-        runAsUser: 65534
-        runAsGroup: 65534
-        fsGroup: 65534
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: analytix
           image: analytix:latest
@@ -32,8 +33,19 @@ spec:
               value: "0.0.0.0"
             - name: ANALYTX_PORT
               value: "8765"
+            # Multipart spool + libraries that touch HOME/XDG under read-only root
             - name: TMPDIR
               value: /tmp
+            - name: HOME
+              value: /tmp
+            - name: XDG_CACHE_HOME
+              value: /tmp
+            - name: XDG_CONFIG_HOME
+              value: /tmp
+            - name: LANG
+              value: C.UTF-8
+            - name: LC_ALL
+              value: C.UTF-8
           volumeMounts:
             - name: tmp
               mountPath: /tmp
@@ -63,4 +75,5 @@ spec:
               drop: ["ALL"]
       volumes:
         - name: tmp
-          emptyDir: {}
+          emptyDir:
+            sizeLimit: 1Gi
